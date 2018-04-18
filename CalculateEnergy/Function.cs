@@ -47,6 +47,11 @@ namespace CalculateEnergy
             public double Energi;
         }
 
+        public void FunctionHandler(ILambdaContext context)
+        {
+            CalculateProducedPower();
+        }
+
         static public string GetIrrradianceData()
         {
             var date = DateTime.Today;
@@ -124,7 +129,7 @@ Mullsjö 358000";
             return dataDict;
         }
 
-        static public void CalculateProducedPower(ILambdaContext context)
+        static public void CalculateProducedPower()
         {
             Dictionary<string, Dictionary<Date, double>> munDict =
                 new Dictionary<string, Dictionary<Date, double>>();
