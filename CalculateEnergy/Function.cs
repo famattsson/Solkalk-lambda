@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net;
 using Amazon.Lambda.Core;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
+using System.Data;
 using System.Text;
 using System.IO;
 using System.Globalization;
@@ -19,14 +21,6 @@ namespace CalculateEnergy
 
     public class CalculateEnergy
     {
-
-
-        /// <summary>
-        /// A simple function that takes a string and does a ToUpper
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
 
         public struct Date
         {
@@ -168,6 +162,12 @@ Mullsjö 358000";
                         var query = "INSERT INTO ProducedPower VALUES(@energi,@kommun,@year,@month,@day,@hour)";
                         using (var command = new SqlCommand(query, conn))
                         {
+                            command.Parameters.Add("@energi", SqlDbType.Float).Value = powerRecord.Energi;
+                            command.Parameters.Add("@kommun", SqlDbType.NChar).Value = powerRecord.Kommun;
+                            command.Parameters.Add("@year", SqlDbType.NChar).Value = powerRecord.Year;
+                            command.Parameters.Add("@month", SqlDbType.Float).Value = powerRecord.Month;
+                            command.Parameters.Add("@day", SqlDbType.NChar).Value = powerRecord.Day;
+                            command.Parameters.Add("@hour", SqlDbType.NChar).Value = powerRecord.Hour;
                             command.Connection.Open();
                             command.ExecuteNonQuery();
                             command.Connection.Close();
