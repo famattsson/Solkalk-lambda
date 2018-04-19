@@ -12,10 +12,10 @@
     "framework"     : "netcoreapp2.0",
     "function-runtime" : "dotnetcore2.0",
     "function-memory-size" : 256,
-    "function-timeout"     : 60,
+    "function-timeout"     : 300,
     "function-handler"     : "CalculateEnergy::CalculateEnergy.CalculateEnergy::FunctionHandler",
     "function-name"        : "CalculateEnergy",
-    "function-role"        : "arn:aws:iam::756791580451:role/service-role/FilipMattsson",
+    "function-role"        : "arn:aws:iam::756791580451:role/service-role/mafi1616",
     "tracing-mode"         : "PassThrough",
     "environment-variables" : ""
 }

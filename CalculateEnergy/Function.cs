@@ -22,6 +22,7 @@ namespace CalculateEnergy
     public class CalculateEnergy
     {
 
+
         public struct Date
         {
             public string year;
@@ -31,7 +32,7 @@ namespace CalculateEnergy
             public string date;
         }
 
-        public struct PowerRecord 
+        public struct PowerRecord
         {
             public string Kommun;
             public Date date;
@@ -47,18 +48,17 @@ namespace CalculateEnergy
 
         static public Dictionary<string, string> GetIrrradianceData()
         {
-;
             Dictionary<string, Tuple<float, float>> kommunDict = new Dictionary<string, Tuple<float, float>>()
-            {
-                { "Aneby",Tuple.Create(57.40f, 14.66f) }, { "Tranås", Tuple.Create(58f,15f) },
-                { "Nässjö",Tuple.Create(57.65f, 14.70f) }, { "Eksjö", Tuple.Create(57.67f,15f) },
-                { "Vetlanda",Tuple.Create(57.43f, 15f) }, { "Sävsjö", Tuple.Create(57.39f,14.67f) },
-                { "Värnamo",Tuple.Create(57.18f, 14f) }, { "Gislaved", Tuple.Create(57.30f, 13.54f) },
-                { "Vaggeryd",Tuple.Create(57.50f, 14.15f) }, { "Jönköping", Tuple.Create(57.78f,14.2f) },
-                { "Habo",Tuple.Create(57.91f, 14.07f) }, { "Mullsjö", Tuple.Create(57.92f,13.88f) },
-                { "Gnosjö",Tuple.Create(57.36f, 13.74f) }
-            };
-            Dictionary<string,string> responseDict = new Dictionary<string, string>();
+        {
+            { "Aneby",Tuple.Create(57f, 15f) }, { "Tranås", Tuple.Create(58f,15f) },
+            { "Nässjö",Tuple.Create(58f, 15f) }, { "Eksjö", Tuple.Create(57f,15f) },
+            { "Vetlanda",Tuple.Create(57f, 15f) }, { "Sävsjö", Tuple.Create(57f,15f) },
+            { "Värnamo",Tuple.Create(57f, 14f) }, { "Gislaved", Tuple.Create(57f, 14f) },
+            { "Vaggeryd",Tuple.Create(58f, 14f) }, { "Jönköping", Tuple.Create(58f,14f) },
+            { "Habo",Tuple.Create(58f, 14f) }, { "Mullsjö", Tuple.Create(58f,14f) },
+            { "Gnosjö",Tuple.Create(57f, 14f) }
+        };
+            Dictionary<string, string> responseDict = new Dictionary<string, string>();
             var date = DateTime.Today;
             var hour = 0;
             var day = date.AddDays(-1).Day;
@@ -117,6 +117,7 @@ Mullsjö 358000";
                         irradianceRecord.date.day = data[2];
                         irradianceRecord.date.hour = data[3];
                         irradianceRecord.Energi = float.Parse(data[4], CultureInfo.InvariantCulture.NumberFormat);
+                        irradianceRecords.Add(irradianceRecord);
                     }
                 }
             }
@@ -175,7 +176,7 @@ Mullsjö 358000";
                     powerRecord.date.month = elem2.Key.month;
                     powerRecord.date.day = elem2.Key.day;
                     powerRecord.Energi += elem2.Value;
-                    
+
                 }
                 using (var conn = new SqlConnection("Data Source=solkalkdb.chkikmbcmqgq.eu-west-1.rds.amazonaws.com;Initial Catalog=SolkalkDb;Integrated Security=False;User ID=NFK2018;Password=NFKsolkalk;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"))
                 {
@@ -185,8 +186,9 @@ Mullsjö 358000";
                         command.Parameters.Add("@energi", SqlDbType.Float).Value = powerRecord.Energi;
                         command.Parameters.Add("@kommun", SqlDbType.NChar).Value = powerRecord.Kommun;
                         command.Parameters.Add("@year", SqlDbType.NChar).Value = powerRecord.date.year;
-                        command.Parameters.Add("@month", SqlDbType.Float).Value = powerRecord.date.month;
+                        command.Parameters.Add("@month", SqlDbType.NChar).Value = powerRecord.date.month;
                         command.Parameters.Add("@day", SqlDbType.NChar).Value = powerRecord.date.day;
+                        command.Parameters.Add("@hour", SqlDbType.NChar).Value = "00";
                         command.Connection.Open();
                         command.ExecuteNonQuery();
                         command.Connection.Close();
