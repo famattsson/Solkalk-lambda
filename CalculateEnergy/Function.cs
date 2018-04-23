@@ -180,7 +180,7 @@ Mullsjö 358000";
                 }
                 using (var conn = new SqlConnection("Data Source=solkalkdb.chkikmbcmqgq.eu-west-1.rds.amazonaws.com;Initial Catalog=SolkalkDb;Integrated Security=False;User ID=NFK2018;Password=NFKsolkalk;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"))
                 {
-                    var query = "INSERT INTO ProducedPower VALUES(@energi,@kommun,@year,@month,@day,@hour)";
+                    var query = "INSERT INTO ProducedMunicipalPower VALUES(@energi,@kommun,@year,@month,@day,@hour)";
                     using (var command = new SqlCommand(query, conn))
                     {
                         command.Parameters.Add("@energi", SqlDbType.Float).Value = powerRecord.Energi;
