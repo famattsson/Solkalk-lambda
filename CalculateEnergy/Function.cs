@@ -180,15 +180,15 @@ Mullsjö 358000";
                 }
                 using (var conn = new SqlConnection("Data Source=solkalkdb.chkikmbcmqgq.eu-west-1.rds.amazonaws.com;Initial Catalog=SolkalkDb;Integrated Security=False;User ID=NFK2018;Password=NFKsolkalk;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"))
                 {
-                    var query = "INSERT INTO ProducedMunicipalPower VALUES(@energi,@kommun,@year,@month,@day,@hour)";
+                    var query = "INSERT INTO ProducedMunicipalPower VALUES(@kommun,@energi,@year,@month,@day,@hour)";
                     using (var command = new SqlCommand(query, conn))
                     {
                         command.Parameters.Add("@energi", SqlDbType.Float).Value = powerRecord.Energi;
-                        command.Parameters.Add("@kommun", SqlDbType.NChar).Value = powerRecord.Kommun;
-                        command.Parameters.Add("@year", SqlDbType.NChar).Value = powerRecord.date.year;
-                        command.Parameters.Add("@month", SqlDbType.NChar).Value = powerRecord.date.month;
-                        command.Parameters.Add("@day", SqlDbType.NChar).Value = powerRecord.date.day;
-                        command.Parameters.Add("@hour", SqlDbType.NChar).Value = "00";
+                        command.Parameters.Add("@kommun", SqlDbType.VarChar).Value = powerRecord.Kommun;
+                        command.Parameters.Add("@year", SqlDbType.VarChar).Value = powerRecord.date.year;
+                        command.Parameters.Add("@month", SqlDbType.VarChar).Value = powerRecord.date.month;
+                        command.Parameters.Add("@day", SqlDbType.VarChar).Value = powerRecord.date.day;
+                        command.Parameters.Add("@hour", SqlDbType.VarChar).Value = "00";
                         command.Connection.Open();
                         command.ExecuteNonQuery();
                         command.Connection.Close();
