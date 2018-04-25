@@ -6,7 +6,7 @@
         "dotnet lambda help",
         "All the command line options for the Lambda command can be specified in this file."
     ],
-    "profile"     : "mafi1616",
+    "profile"     : "filip.mattsson@cybercom.com",
     "region"      : "eu-west-1",
     "configuration" : "Release",
     "framework"     : "netcoreapp2.0",
@@ -15,7 +15,7 @@
     "function-timeout"     : 300,
     "function-handler"     : "CalculateEnergy::CalculateEnergy.CalculateEnergy::FunctionHandler",
     "function-name"        : "CalculateEnergy",
-    "function-role"        : "arn:aws:iam::756791580451:role/service-role/mafi1616",
+    "function-role"        : "arn:aws:iam::783000069420:role/Lambda",
     "tracing-mode"         : "PassThrough",
     "environment-variables" : ""
 }
