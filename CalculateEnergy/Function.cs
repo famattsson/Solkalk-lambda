@@ -63,12 +63,15 @@ namespace CalculateEnergy
             var hour = 0;
             var day = date.AddDays(-1).Day;
             var year = date.Year;
-            var month = date.Month;
+            var month2 = date.Month;
+            var month1 = month2;
+            if (date.Day == 1)
+                month1 = month2 - 1;
             var nextDay = date.AddDays(1).Day;
             foreach (var elem in kommunDict)
             {
                 var requestUrl = String.Format("http://strang.smhi.se/extraction/getseries.php?par=117&m1={0}&d1={1}&y1={2}&h1={3}&m2={4}&d2={5}&y2={6}&h2={7}&lat={8}&lon={9}&lev=0",
-                month, day, year, hour, month, nextDay, year, hour, elem.Value.Item1, elem.Value.Item2);
+                month1, day, year, hour, month2, nextDay, year, hour, elem.Value.Item1, elem.Value.Item2);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestUrl);
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -151,7 +154,11 @@ Mullsjö 367000";
             var hour = 0;
             var day = date.AddDays(-1).Day;
             var year = date.Year;
-            var month = date.Month;
+
+            var month2 = date.Month;
+            var month1 = month2;
+            if (date.Day == 1) 
+                month1 = month2 - 1;
             var nextDay = date.AddDays(1).Day;
             foreach (var company in companyDict)
             {
@@ -159,7 +166,7 @@ Mullsjö 367000";
                 foreach (var location in company.Value)
                 {
                     var requestUrl = String.Format("http://strang.smhi.se/extraction/getseries.php?par=117&m1={0}&d1={1}&y1={2}&h1={3}&m2={4}&d2={5}&y2={6}&h2={7}&lat={8}&lon={9}&lev=0",
-                    month, day, year, hour, month, nextDay, year, hour, location.Item1, location.Item2);
+                    month1, day, year, hour, month2, nextDay, year, hour, location.Item1, location.Item2);
 
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestUrl);
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
