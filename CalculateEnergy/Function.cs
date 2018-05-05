@@ -22,6 +22,8 @@ namespace CalculateEnergy
     public class CalculateEnergy
     {
 
+        public static List<string> company = new List<string>() { "C", "c", "company", "Company" };
+        public static List<string> municipality = new List<string>() { "M", "m", "Municipality", "municipality" };
 
         public struct Date
         {
@@ -37,118 +39,44 @@ namespace CalculateEnergy
             public string Name;
             public Date date;
             public double Energy;
+            public double AverageIrradiance;
+            public int Inhabitants;
         }
 
 
 
         public void FunctionHandler(ILambdaContext context)
         {
-            CalculateProducedPower();
+
+            CalculateProducedPower("m");
+            CalculateProducedPower("c");
         }
 
-        static public Dictionary<string, string> GetMunicipalIrrradianceData()
-        {
-            Dictionary<string, Tuple<float, float>> kommunDict = new Dictionary<string, Tuple<float, float>>()
-            {
-                { "Aneby",Tuple.Create(57f, 15f) }, { "Tranås", Tuple.Create(58f,15f) },
-                { "Nässjö",Tuple.Create(58f, 15f) }, { "Eksjö", Tuple.Create(57f,15f) },
-                { "Vetlanda",Tuple.Create(57f, 15f) }, { "Sävsjö", Tuple.Create(57f,15f) },
-                { "Värnamo",Tuple.Create(57f, 14f) }, { "Gislaved", Tuple.Create(57f, 14f) },
-                { "Vaggeryd",Tuple.Create(58f, 14f) }, { "Jönköping", Tuple.Create(58f,14f) },
-                { "Habo",Tuple.Create(58f, 14f) }, { "Mullsjö", Tuple.Create(58f,14f) },
-                { "Gnosjö",Tuple.Create(57f, 14f) }
-            };
-            Dictionary<string, string> responseDict = new Dictionary<string, string>();
-            var date = DateTime.Today;
-            var hour = 0;
-            var day = date.AddDays(-1).Day;
-            var year = date.Year;
-            var month2 = date.Month;
-            var month1 = month2;
-            if (date.Day == 1)
-                month1 = month2 - 1;
-            var nextDay = date.AddDays(1).Day;
-            foreach (var elem in kommunDict)
-            {
-                var requestUrl = String.Format("http://strang.smhi.se/extraction/getseries.php?par=117&m1={0}&d1={1}&y1={2}&h1={3}&m2={4}&d2={5}&y2={6}&h2={7}&lat={8}&lon={9}&lev=0",
-                month1, day, year, hour, month2, nextDay, year, hour, elem.Value.Item1, elem.Value.Item2);
 
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestUrl);
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                Stream responseStream = response.GetResponseStream();
-                StreamReader streamReader = new StreamReader(responseStream, Encoding.UTF8);
-                string responseBody = streamReader.ReadToEnd();
-                responseDict[elem.Key] = responseBody;
-            }
-            return responseDict;
-        }
-
-        static public string GetMunicipalInstalledPowerData()
+        static public Dictionary<string, List<string>> GetIrrradianceData(string type)
         {
-            string data = @"Aneby 299000
-Tranås 530000
-Nässjö 1377000
-Eksjö 611000
-Vetlanda 1484000
-Sävsjö 680000
-Värnamo 1863000
-Gislaved 1123000
-Gnosjö 243000
-Vaggeryd 419000
-Jönköping 3983000
-Habo 206000
-Mullsjö 367000";
-            return data;
-        }
-
-        static public List<PowerRecord> GetMunicipalIrradianceRecords()
-        {
-            Dictionary<string, string> irradianceData = GetMunicipalIrrradianceData();
-            List<PowerRecord> irradianceRecords = new List<PowerRecord>();
-            foreach (var elem in irradianceData)
+            Dictionary<string, Tuple<float, float>[]> coordinateDict = new Dictionary<string, Tuple<float, float>[]>();
+            if (company.Contains(type))
             {
-                string[] dataLines = elem.Value.Split('\n');
-                foreach (var dataLine in dataLines)
+                coordinateDict = new Dictionary<string, Tuple<float, float>[]>
                 {
-                    if (dataLine != "")
-                    {
-                        PowerRecord irradianceRecord = new PowerRecord();
-                        irradianceRecord.Name = elem.Key;
-                        string[] data = dataLine.Split(' ');
-                        irradianceRecord.date.year = data[0];
-                        irradianceRecord.date.month = data[1];
-                        irradianceRecord.date.day = data[2];
-                        irradianceRecord.date.hour = data[3];
-                        irradianceRecord.Energy = float.Parse(data[4], CultureInfo.InvariantCulture.NumberFormat);
-                        irradianceRecords.Add(irradianceRecord);
-                    }
-                }
+                    { "Husqvarna", new[] { Tuple.Create(57f, 15f)} }
+                };
             }
-            return irradianceRecords;
-        }
-
-        static public Dictionary<string, float> GetMunicipalInstalledPowerDict()
-        {
-            Dictionary<string, float> dataDict = new Dictionary<string, float>();
-            string data = GetMunicipalInstalledPowerData();
-            string[] dataLines = data.Split('\r', '\n');
-            foreach (var elem in dataLines)
+            else if (municipality.Contains(type))
             {
-                if (elem != "" && elem != "\r")
+                coordinateDict = new Dictionary<string, Tuple<float, float>[]>()
                 {
-                    string[] dataLine = elem.Split(' ');
-                    dataDict[dataLine[0]] = Int32.Parse(dataLine[1]);
-                }
-
+                    { "Aneby", new[] { Tuple.Create(57f, 15f) } }, { "Tranås", new[] { Tuple.Create(58f,15f) } },
+                    { "Nässjö", new[] { Tuple.Create(58f, 15f) } }, { "Eksjö", new[] { Tuple.Create(57f,15f) } },
+                    { "Vetlanda", new[] {Tuple.Create(57f, 15f) } }, { "Sävsjö", new[] { Tuple.Create(57f,15f) } },
+                    { "Värnamo", new[] { Tuple.Create(57f, 14f) } }, { "Gislaved", new[] { Tuple.Create(57f, 14f) } },
+                    { "Vaggeryd", new[] { Tuple.Create(58f, 14f) } }, { "Jönköping", new[] { Tuple.Create(58f,14f) } },
+                    { "Habo", new[] { Tuple.Create(58f, 14f) } }, { "Mullsjö", new[] { Tuple.Create(58f,14f) } },
+                    { "Gnosjö", new[] {Tuple.Create(57f, 14f) } }
+                };
             }
-            return dataDict;
-        }
-        static public Dictionary<string, List<string>> GetCompanyIrrradianceData()
-        {
-            Dictionary<string, Tuple<float, float>[]> companyDict = new Dictionary<string, Tuple<float, float>[]>
-            {
-                { "Husqvarna", new[] { Tuple.Create(57f, 15f)} }
-            };
+
             Dictionary<string, List<string>> responseDict = new Dictionary<string, List<string>>();
             var date = DateTime.Today;
             var hour = 0;
@@ -157,13 +85,13 @@ Mullsjö 367000";
 
             var month2 = date.Month;
             var month1 = month2;
-            if (date.Day == 1) 
+            if (date.Day == 1)
                 month1 = month2 - 1;
-            var nextDay = date.AddDays(1).Day;
-            foreach (var company in companyDict)
+            var nextDay = date.Day;
+            foreach (var coordinate in coordinateDict)
             {
                 List<string> responses = new List<string>();
-                foreach (var location in company.Value)
+                foreach (var location in coordinate.Value)
                 {
                     var requestUrl = String.Format("http://strang.smhi.se/extraction/getseries.php?par=117&m1={0}&d1={1}&y1={2}&h1={3}&m2={4}&d2={5}&y2={6}&h2={7}&lat={8}&lon={9}&lev=0",
                     month1, day, year, hour, month2, nextDay, year, hour, location.Item1, location.Item2);
@@ -174,40 +102,53 @@ Mullsjö 367000";
                     StreamReader streamReader = new StreamReader(responseStream, Encoding.UTF8);
                     string responseBody = streamReader.ReadToEnd();
                     responses.Add(responseBody);
-                    responseDict[company.Key] = responses;
+                    responseDict[coordinate.Key] = responses;
                 }
             }
             return responseDict;
         }
 
-        static public string GetCompanyInstalledPowerData()
+        static public string GetInstalledPowerData(string type)
         {
-            string data = @"Husqvarna 17500";
-            return data;
+            if (company.Contains(type))
+            {
+                string data = Properties.Resources.CompanyInstalledPowerData;
+                return data;
+            }
+            else if (municipality.Contains(type))
+            {
+                string data = Properties.Resources.MunicipalInstalledPowerData;
+                return data;
+            }
+            else
+            {
+                return null;
+            }
         }
 
-        static public List<PowerRecord> GetCompanyIrradianceRecords()
+        static public Dictionary<string, List<PowerRecord>> GetIrradianceRecords(string type)
         {
-            Dictionary<string, List<string>> irradianceData = GetCompanyIrrradianceData();
-            List<PowerRecord> irradianceRecords = new List<PowerRecord>();
-            foreach (var company in irradianceData)
+            Dictionary<string, List<string>> irradianceData = GetIrrradianceData(type);
+            Dictionary<string, List<PowerRecord>> irradianceRecords = new Dictionary<string, List<PowerRecord>>();
+            foreach (var organization in irradianceData)
             {
-                foreach (var location in company.Value)
+                foreach (var location in organization.Value)
                 {
+                    irradianceRecords.Add(organization.Key, new List<PowerRecord>());
                     string[] dataLines = location.Split('\n');
                     foreach (var dataLine in dataLines)
                     {
                         if (dataLine != "")
                         {
                             PowerRecord irradianceRecord = new PowerRecord();
-                            irradianceRecord.Name = company.Key;
+                            irradianceRecord.Name = organization.Key;
                             string[] data = dataLine.Split(' ');
                             irradianceRecord.date.year = data[0];
                             irradianceRecord.date.month = data[1];
                             irradianceRecord.date.day = data[2];
                             irradianceRecord.date.hour = data[3];
                             irradianceRecord.Energy = float.Parse(data[4], CultureInfo.InvariantCulture.NumberFormat);
-                            irradianceRecords.Add(irradianceRecord);
+                            irradianceRecords[organization.Key].Add(irradianceRecord);
                         }
                     }
                 }
@@ -215,81 +156,75 @@ Mullsjö 367000";
             return irradianceRecords;
         }
 
-        static public Dictionary<string, float> GetCompanyInstalledPowerDict()
+        static public List<PowerRecord> GetInstalledPowerRecords(string type)
         {
-            Dictionary<string, float> dataDict = new Dictionary<string, float>();
-            string data = GetCompanyInstalledPowerData();
+            List<PowerRecord> installedPowerRecords = new List<PowerRecord>();
+            string data = GetInstalledPowerData(type);
             string[] dataLines = data.Split('\r', '\n');
             foreach (var elem in dataLines)
             {
                 if (elem != "" && elem != "\r")
                 {
+                    PowerRecord installedPowerRecord = new PowerRecord();
                     string[] dataLine = elem.Split(' ');
-                    dataDict[dataLine[0]] = Int32.Parse(dataLine[1]);
+                    installedPowerRecord.Name = dataLine[0];
+                    installedPowerRecord.Energy = Int32.Parse(dataLine[1]);
+                    if (municipality.Contains(type))
+                    {
+                        installedPowerRecord.Inhabitants = Int32.Parse(dataLine[2]);
+                    }
+                    installedPowerRecords.Add(installedPowerRecord);
+
                 }
 
             }
-            return dataDict;
+            return installedPowerRecords;
         }
 
-        static public void CalculateProducedPower()
+        static public void CalculateProducedPower(string type)
         {
-            Dictionary<string, Dictionary<Date, double>> munDict =
-                new Dictionary<string, Dictionary<Date, double>>();
+            List<PowerRecord> installedPowerRecords = GetInstalledPowerRecords(type);
+            Dictionary<string, List<PowerRecord>> irradianceRecords = GetIrradianceRecords(type);
 
-            Dictionary<string, float> installedPowerDict = GetMunicipalInstalledPowerDict();
-            List<PowerRecord> irradianceRecords = GetMunicipalIrradianceRecords();
-
-            foreach (var municipality in installedPowerDict)
+            List<PowerRecord> powerRecords = new List<PowerRecord>();
+            foreach (var record in installedPowerRecords)
             {
-                Dictionary<Date, double> powerDict = new Dictionary<Date, double>();
-                foreach (var irradiance in irradianceRecords)
+                double totalIrradiance = 0;
+                PowerRecord powerRecord = new PowerRecord();
+                powerRecord.Name = record.Name;
+                powerRecord.Inhabitants = record.Inhabitants;
+                foreach (var irradiance in irradianceRecords[record.Name])
                 {
-                    var area = municipality.Value / (0.15 * 1000); //Kommunal installerad effekt/(verkningsgrad * Irradians vid STC)
-                    powerDict[irradiance.date] = irradiance.Energy * 0.15 * 0.9 * area;
+                    var area = record.Energy / (0.15 * 1000); //Kommunal installerad effekt/(verkningsgrad * Irradians vid STC)
+
+                    powerRecord.Energy += irradiance.Energy * 0.15 * 0.9 * area;
+                    powerRecord.date = irradiance.date;
+                    totalIrradiance += irradiance.Energy;
                 }
-                munDict[municipality.Key] = powerDict;
+                powerRecord.AverageIrradiance = totalIrradiance / 24;
+                powerRecords.Add(powerRecord);
             }
-            AddMunicipalPowerRecord(munDict);
-
-            Dictionary<string, Dictionary<Date, double>> companyDict =
-                new Dictionary<string, Dictionary<Date, double>>();
-
-            List<PowerRecord> companyRecords = GetCompanyIrradianceRecords();
-            Dictionary<string, float> installedCompanyPower = GetCompanyInstalledPowerDict();
-
-            foreach (var company in installedCompanyPower)
-            {
-                Dictionary<Date, double> powerDict = new Dictionary<Date, double>();
-                foreach (var irradiance in irradianceRecords)
-                {
-                    var area = company.Value / (0.15 * 1000); //Kommunal installerad effekt/(verkningsgrad * Irradians vid STC)
-                    powerDict[irradiance.date] = irradiance.Energy * 0.15 * 0.9 * area;
-                }
-                companyDict[company.Key] = powerDict;
-            }
-            AddCompanyPowerRecord(companyDict);
+            AddPowerRecords(powerRecords, type);
         }
 
-        static public void AddMunicipalPowerRecord(Dictionary<string, Dictionary<Date, double>> powerDict)
+        static public void AddPowerRecords(List<PowerRecord> powerRecords, string type)
         {
-            foreach (var elem in powerDict)
+            var query = "";
+
+            if (company.Contains(type))
             {
-                var powerRecord = new PowerRecord();
-                powerRecord.Name = elem.Key;
-                var lastpowerrecord = powerRecord;
+                query = "INSERT INTO ProducedCompanyPower VALUES(@kommun,@energi,@year,@month,@day,@irradiance)";
+            }
 
-                foreach (var elem2 in elem.Value)
-                {
-                    powerRecord.date.year = elem2.Key.year;
-                    powerRecord.date.month = elem2.Key.month;
-                    powerRecord.date.day = elem2.Key.day;
-                    powerRecord.Energy += elem2.Value;
+            else if (municipality.Contains(type))
+            {
+                query = "INSERT INTO ProducedMunicipalPower VALUES(@kommun,@energi,@year,@month,@day,@inhabitants,@irradiance)";
+            }
 
-                }
+            foreach (var powerRecord in powerRecords)
+            {
                 using (var conn = new SqlConnection("Data Source=solkalkdb.cqjgliexpw2a.eu-west-1.rds.amazonaws.com;Initial Catalog=SolkalkDb;Integrated Security=False;User ID=NFK2018;Password=NFKsolkalk;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"))
                 {
-                    var query = "INSERT INTO ProducedMunicipalPower VALUES(@kommun,@energi,@year,@month,@day,@hour)";
                     using (var command = new SqlCommand(query, conn))
                     {
                         command.Parameters.Add("@energi", SqlDbType.Float).Value = powerRecord.Energy;
@@ -297,41 +232,11 @@ Mullsjö 367000";
                         command.Parameters.Add("@year", SqlDbType.VarChar).Value = powerRecord.date.year;
                         command.Parameters.Add("@month", SqlDbType.VarChar).Value = powerRecord.date.month;
                         command.Parameters.Add("@day", SqlDbType.VarChar).Value = powerRecord.date.day;
-                        command.Parameters.Add("@hour", SqlDbType.VarChar).Value = "00";
-                        command.Connection.Open();
-                        command.ExecuteNonQuery();
-                        command.Connection.Close();
-                    }
-                }
-            }
-        }
-        static public void AddCompanyPowerRecord(Dictionary<string, Dictionary<Date, double>> powerDict)
-        {
-            foreach (var elem in powerDict)
-            {
-                var powerRecord = new PowerRecord();
-                powerRecord.Name = elem.Key;
-                var lastpowerrecord = powerRecord;
-
-                foreach (var elem2 in elem.Value)
-                {
-                    powerRecord.date.year = elem2.Key.year;
-                    powerRecord.date.month = elem2.Key.month;
-                    powerRecord.date.day = elem2.Key.day;
-                    powerRecord.Energy += elem2.Value;
-
-                }
-                using (var conn = new SqlConnection("Data Source=solkalkdb.cqjgliexpw2a.eu-west-1.rds.amazonaws.com;Initial Catalog=SolkalkDb;Integrated Security=False;User ID=NFK2018;Password=NFKsolkalk;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"))
-                {
-                    var query = "INSERT INTO ProducedCompanyPower VALUES(@företag,@energi,@year,@month,@day,@hour)";
-                    using (var command = new SqlCommand(query, conn))
-                    {
-                        command.Parameters.Add("@energi", SqlDbType.Float).Value = powerRecord.Energy;
-                        command.Parameters.Add("@företag", SqlDbType.VarChar).Value = powerRecord.Name;
-                        command.Parameters.Add("@year", SqlDbType.VarChar).Value = powerRecord.date.year;
-                        command.Parameters.Add("@month", SqlDbType.VarChar).Value = powerRecord.date.month;
-                        command.Parameters.Add("@day", SqlDbType.VarChar).Value = powerRecord.date.day;
-                        command.Parameters.Add("@hour", SqlDbType.VarChar).Value = "00";
+                        if (municipality.Contains(type))
+                        {
+                            command.Parameters.Add("@inhabitants", SqlDbType.Float).Value = powerRecord.date.day;
+                        }
+                        command.Parameters.Add("@irradiance", SqlDbType.Float).Value = powerRecord.AverageIrradiance;
                         command.Connection.Open();
                         command.ExecuteNonQuery();
                         command.Connection.Close();
