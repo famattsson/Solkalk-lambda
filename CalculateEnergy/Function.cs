@@ -86,7 +86,7 @@ namespace CalculateEnergy
             var month1 = month2;
             if (date.Day < day)
                 month1 = month2 - 1;
-            if (month1 == 12)
+            if (month1 == 12 && date.Day < day)
             {
                 month2 = 1;
             } 
