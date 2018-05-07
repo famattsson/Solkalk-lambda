@@ -47,7 +47,6 @@ namespace CalculateEnergy
 
         public void FunctionHandler(ILambdaContext context)
         {
-
             CalculateProducedPower("m");
             CalculateProducedPower("c");
         }
@@ -85,8 +84,12 @@ namespace CalculateEnergy
 
             var month2 = date.Month;
             var month1 = month2;
-            if (date.Day == 1)
+            if (date.Day < day)
                 month1 = month2 - 1;
+            if (month1 == 12)
+            {
+                month2 = 1;
+            } 
             var nextDay = date.Day;
             foreach (var coordinate in coordinateDict)
             {
@@ -234,7 +237,7 @@ namespace CalculateEnergy
                         command.Parameters.Add("@day", SqlDbType.VarChar).Value = powerRecord.date.day;
                         if (municipality.Contains(type))
                         {
-                            command.Parameters.Add("@inhabitants", SqlDbType.Float).Value = powerRecord.date.day;
+                            command.Parameters.Add("@inhabitants", SqlDbType.Float).Value = powerRecord.Inhabitants;
                         }
                         command.Parameters.Add("@irradiance", SqlDbType.Float).Value = powerRecord.AverageIrradiance;
                         command.Connection.Open();
