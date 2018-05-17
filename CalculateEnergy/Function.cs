@@ -81,16 +81,17 @@ namespace CalculateEnergy
             var hour = 0;
             var day = date.AddDays(-1).Day;
             var year = date.Year;
-
+            var nextDay = date.Day;
             var month2 = date.Month;
             var month1 = month2;
-            if (date.Day < day)
+
+            if (nextDay < day)
                 month1 = month2 - 1;
             if (month1 == 12 && date.Day < day)
             {
                 month2 = 1;
             } 
-            var nextDay = date.Day;
+            
             foreach (var coordinate in coordinateDict)
             {
                 List<string> responses = new List<string>();
